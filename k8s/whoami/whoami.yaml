@@ -1,0 +1,72 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: whoami
+  labels:
+    app: traefiklabs
+    name: whoami
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefiklabs
+      task: whoami
+  template:
+    metadata:
+      labels:
+        app: traefiklabs
+        task: whoami
+    spec:
+      containers:
+        - name: whoami
+          image: traefik/whoami
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "250m"
+            limits:
+              memory: "200Mi"
+              cpu: "500m"
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transmission-service
+  namespace: transmission
+spec:
+  selector:
+    app: transmission
+  ports:
+    - name: transmission-port
+      protocol: TCP
+      port: 9091
+      targetPort: 9091
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: transmission-ingress
+  namespace: transmission
+  annotations:
+    cert-manager.io/cluster-issuer: lets-encrypt
+    kubernetes.io/ingress.class: public
+spec:
+  tls:
+    - hosts:
+      - transmission.chunk.lol
+      secretName: transmission-tls
+  rules:
+  - host: transmission.chunk.lol
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service: 
+            name: transmission-service
+            port: 
+              number: 9091

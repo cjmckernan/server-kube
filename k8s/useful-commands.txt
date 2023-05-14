@@ -1,0 +1,2 @@
+kubectl port-forward -n kube-system service/kubernetes-dashboard 10443:443
+kubectl -n kube-system describe secret microk8s-dashboard-token

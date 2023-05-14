@@ -3,3 +3,8 @@
 - Transmission
 - Plex
 - API
+
+
+
+# Run docker dev env
+
